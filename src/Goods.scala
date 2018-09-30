@@ -1,7 +1,7 @@
 import scala.collection.mutable.ArrayBuffer
 
 /***
-  *伴生类
+  * 伴生类
   * 伴生类可以访问伴生对象private字段
   * 伴生对象可以访问伴生对像的私有方法
   */
@@ -15,10 +15,10 @@ import scala.collection.mutable.ArrayBuffer
   * 伴生对象
   */
 object Goods{
-   private var name:String="aa";
-   private var age:Int=10;
+   private val name:String="aa";
+   private val age:Int=10;
    def print(): Unit ={
-      var goods=new Goods();
+      val goods=new Goods();
       goods.output();
    }
    def main(args: Array[String]) {
