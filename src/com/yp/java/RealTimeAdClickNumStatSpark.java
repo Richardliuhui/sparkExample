@@ -94,7 +94,7 @@ public class RealTimeAdClickNumStatSpark {
                 List<String> blacklist = new ArrayList<String>();
                 List<Tuple2<String, Boolean>> list = new ArrayList<Tuple2<String, Boolean>>();
                 for (String line : blacklist) {
-                    list.add(new Tuple2<String, Boolean>(line, true));
+                    list.add(new Tuple2(line, true));
                 }
                 JavaSparkContext sc = new JavaSparkContext(rdd.context());
                 JavaPairRDD<String, Boolean> pairsBlacklistRDD = sc.parallelizePairs(list);
@@ -105,7 +105,7 @@ public class RealTimeAdClickNumStatSpark {
                         //timestamp province city uid adid
                         String[] array = line.split(" ");
                         String uid = array[3];
-                        return new Tuple2<String, String>(uid, line);
+                        return new Tuple2(uid, line);
                     }
                 });
                 //与黑名单RDD进行join
@@ -143,9 +143,9 @@ public class RealTimeAdClickNumStatSpark {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 String timeStr = sdf.format(time);
                 String uid = array[3];
-                String adid = array[4];
-                String key = timeStr +"_"+ uid +"_"+ adid;
-                return new Tuple2<String, Long>(key, 1L);
+                String adId = array[4];
+                String key = timeStr +"_"+ uid +"_"+ adId;
+                return new Tuple2(key, 1L);
             }
         });
         JavaPairDStream<String, Long> dailyUserClickNumCountRDD = dailyUserClickNumRDD.reduceByKey((x, y) -> x + y);

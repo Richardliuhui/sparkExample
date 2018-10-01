@@ -17,7 +17,7 @@ public class LineCountSpark {
                 .setMaster("local");
         JavaSparkContext sc=new JavaSparkContext(conf);
         JavaRDD<String> linesRdd = sc.textFile("file:///Users/thejoyrun/Documents/workspace/gzserver/scala02/src/com/yp/lines.txt");
-        JavaPairRDD<String, Integer> pairRDD = linesRdd.mapToPair(x -> new Tuple2<String, Integer>(x, 1));
+        JavaPairRDD<String, Integer> pairRDD = linesRdd.mapToPair(x -> new Tuple2(x, 1));
         JavaPairRDD<String, Integer> reduceByKeyRdd = pairRDD.reduceByKey((x, y) -> x + y);
         reduceByKeyRdd.foreach(x-> System.out.println(x._1+","+x._2));
         sc.close();

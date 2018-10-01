@@ -22,12 +22,9 @@ public class GroupTop3Spark {
                 .setMaster("local");
         JavaSparkContext sc=new JavaSparkContext(conf);
         JavaRDD<String> lineRdd = sc.textFile("file:///Users/thejoyrun/Documents/workspace/gzserver/scala02/src/com/yp/group.txt");
-        JavaPairRDD<String, Integer> pairRDD = lineRdd.mapToPair(new PairFunction<String, String, Integer>() {
-            @Override
-            public Tuple2<String, Integer> call(String s) throws Exception {
-                String array[] = s.split(" ");
-                return new Tuple2<String, Integer>(array[0], Integer.parseInt(array[1]));
-            }
+        JavaPairRDD<String, Integer> pairRDD = lineRdd.mapToPair(s->{
+            String array[] = s.split(" ");
+            return new Tuple2(array[0], Integer.parseInt(array[1]));
         });
         JavaPairRDD<String, Iterable<Integer>> groupRdd = pairRDD.groupByKey();
         JavaPairRDD<String, Iterable<Integer>> javaPairRDD = groupRdd.mapToPair(new PairFunction<Tuple2<String, Iterable<Integer>>, String, Iterable<Integer>>() {
@@ -54,17 +51,13 @@ public class GroupTop3Spark {
                 return new Tuple2<String, Iterable<Integer>>(className, Arrays.asList(top3));
             }
         });
-        javaPairRDD.foreach(new VoidFunction<Tuple2<String, Iterable<Integer>>>() {
-            @Override
-            public void call(Tuple2<String, Iterable<Integer>> tuple2) throws Exception {
-                System.out.println(tuple2._1+":");
-                Iterator<Integer> iterator=tuple2._2.iterator();
-                while (iterator.hasNext()){
-                    System.out.print(iterator.next()+"\t");
-                }
-                System.out.println("");
-
+        javaPairRDD.foreach(tuple2->{
+            System.out.println(tuple2._1+":");
+            Iterator<Integer> iterator=tuple2._2.iterator();
+            while (iterator.hasNext()){
+                System.out.print(iterator.next()+"\t");
             }
+            System.out.println("aa");
         });
         sc.stop();
     }
