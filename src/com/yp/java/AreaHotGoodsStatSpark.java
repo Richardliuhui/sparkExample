@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @author liuhui
  * @date 2018-09-29 上午9:53
- * 主要是spark sql的功能
+ * 主要是spark sql的功能,热门商品统计
  */
 public class AreaHotGoodsStatSpark {
     public static void main(String[] args) {

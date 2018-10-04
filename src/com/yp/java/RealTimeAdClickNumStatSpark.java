@@ -110,6 +110,7 @@ public class RealTimeAdClickNumStatSpark {
                 });
                 //与黑名单RDD进行join
                 JavaPairRDD<String, Tuple2<String, Optional<Boolean>>> stringTuple2JavaPairRDD = uidtoPairRDD.leftOuterJoin(pairsBlacklistRDD);
+                //去掉黑名单的数据
                 JavaPairRDD<String, Tuple2<String, Optional<Boolean>>> filterRDD = stringTuple2JavaPairRDD.filter(new Function<Tuple2<String, Tuple2<String, Optional<Boolean>>>, Boolean>() {
                     @Override
                     public Boolean call(Tuple2<String, Tuple2<String, Optional<Boolean>>> tuple) throws Exception {
@@ -148,6 +149,7 @@ public class RealTimeAdClickNumStatSpark {
                 return new Tuple2(key, 1L);
             }
         });
+        //统计yyyyMMdd_uid_adId的点击量
         JavaPairDStream<String, Long> dailyUserClickNumCountRDD = dailyUserClickNumRDD.reduceByKey((x, y) -> x + y);
         //用户点击数入库
         dailyUserClickNumCountRDD.foreachRDD(new VoidFunction<JavaPairRDD<String, Long>>() {
@@ -163,6 +165,7 @@ public class RealTimeAdClickNumStatSpark {
                 });
             }
         });
+        //点击量大于100的uid找出来
         JavaPairDStream<String, Long> blacklistRDD = dailyUserClickNumCountRDD.filter(new Function<Tuple2<String, Long>, Boolean>() {
             @Override
             public Boolean call(Tuple2<String, Long> tuple) throws Exception {
@@ -178,6 +181,7 @@ public class RealTimeAdClickNumStatSpark {
                 return false;
             }
         });
+        //黑名单的UID
         JavaDStream<String> blacklistUidRDD = blacklistRDD.map(new Function<Tuple2<String, Long>, String>() {
             @Override
             public String call(Tuple2<String, Long> tuple) throws Exception {
@@ -219,9 +223,10 @@ public class RealTimeAdClickNumStatSpark {
                 String city = array[2];
                 String adid = array[4];
                 String key = timeStr + "_" + province + "_" + city + "_" + adid;
-                return new Tuple2<String, Long>(key, 1L);
+                return new Tuple2(key, 1L);
             }
         });
+        //统计yyyyMMdd_province_city_adid的访问量
         JavaPairDStream<String, Long> eggDStream = mapDStream.updateStateByKey(new Function2<List<Long>, Optional<Long>, Optional<Long>>() {
             @Override
             public Optional<Long> call(List<Long> v1, Optional<Long> v2) throws Exception {
@@ -249,18 +254,26 @@ public class RealTimeAdClickNumStatSpark {
         });
         return eggDStream;
     }
+
+    /***
+     * 计算每个省top3的AD
+     * @param realTimeStatDStream
+     */
     private static void calculateAdTop3(JavaPairDStream<String, Long> realTimeStatDStream){
         JavaDStream<Row> transformDStreamTop3 = realTimeStatDStream.transform(new Function<JavaPairRDD<String, Long>, JavaRDD<Row>>() {
             @Override
             public JavaRDD<Row> call(JavaPairRDD<String, Long> rdd) throws Exception {
+                //
                 JavaPairRDD<String, Long> pairRDD = rdd.mapToPair(new PairFunction<Tuple2<String, Long>, String, Long>() {
                     @Override
                     public Tuple2<String, Long> call(Tuple2<String, Long> tuple2) throws Exception {
                         String[] array = tuple2._1.split("_");
-                        String key = array[0] + "_" + array[1] + "_" + array[3];
-                        return new Tuple2<String, Long>(key, tuple2._2);
+                        //array[0]为timestamp,array[1]为province,array[3]为adID
+                        String key = array[0] + "_" + array[1] + "_" + array[4];
+                        return new Tuple2(key, tuple2._2);
                     }
                 });
+                //计算每个省第一个用户的访问量
                 JavaPairRDD<String, Long> aggRDD = pairRDD.reduceByKey((x, y) -> x + y);
                 JavaRDD<Row> rowRDD = aggRDD.map(new Function<Tuple2<String, Long>, Row>() {
                     @Override

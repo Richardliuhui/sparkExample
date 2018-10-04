@@ -25,4 +25,11 @@ public class ConfigurationManager {
     public static String getProperty(String key){
         return properties.getProperty(key);
     }
+    public static Integer getIntegerValue(String key){
+        return Integer.parseInt(properties.getProperty(key));
+    }
+    public static Boolean getBooleanValue(String key){
+        return Boolean.valueOf(properties.getProperty(key));
+    }
+
 }
