@@ -53,8 +53,11 @@ public class SessionStatSpark {
         ITaskDAO taskDAO= DAOFactory.getTaskDAO();
         Task task = taskDAO.findTaskById(Integer.parseInt(args[0]));
         JSONObject jsonObject=JSONObject.parseObject(task.getDataJson());
+        //根据条件过滤数据
         JavaRDD<Row> actionByDateRangeRDD = getActionByDateRange(sqlContext, jsonObject);
+        //转换成<sessionId,Row>的RDD
         JavaPairRDD<String,Row> session2ActionRDD=getSession2ActionRDD(actionByDateRangeRDD);
+        // 把访问信息聚合成<sessionId,egginfo>
         JavaPairRDD<String, String> session2FullAggrInfoRDD = aggregateBySession(sqlContext,session2ActionRDD);
 
         AccumulatorV2<String,String> accumulatorV2=new SessionAggrStatAccumulator();
