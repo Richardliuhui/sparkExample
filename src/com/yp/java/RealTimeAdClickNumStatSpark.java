@@ -221,8 +221,8 @@ public class RealTimeAdClickNumStatSpark {
                 String timeStr = sdf.format(time);
                 String province = array[1];
                 String city = array[2];
-                String adid = array[4];
-                String key = timeStr + "_" + province + "_" + city + "_" + adid;
+                String adId = array[4];
+                String key = timeStr + "_" + province + "_" + city + "_" + adId;
                 return new Tuple2(key, 1L);
             }
         });
